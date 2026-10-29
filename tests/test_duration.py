@@ -17,10 +17,17 @@ class ParseDurationTests(unittest.TestCase):
     def test_units_are_case_insensitive(self):
         self.assertEqual(parse_duration("1H30M"), 5400)
         self.assertEqual(parse_duration("2M"), 120)
+        self.assertEqual(parse_duration("1H2m3S"), 3723)
+
+    def test_zero_duration_is_valid(self):
+        self.assertEqual(parse_duration("0s"), 0)
+        self.assertEqual(parse_duration("0H0M0S"), 0)
 
     def test_invalid_input_raises(self):
-        with self.assertRaises(ValueError):
-            parse_duration("abc")
+        for text in ("abc", "", "   ", "123", "1d"):
+            with self.subTest(text=text):
+                with self.assertRaises(ValueError):
+                    parse_duration(text)
 
 
 if __name__ == "__main__":
