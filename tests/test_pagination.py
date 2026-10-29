@@ -23,6 +23,11 @@ class PageBoundsTests(unittest.TestCase):
         start, end = page_bounds(3, 10)
         self.assertEqual(items[start:end], list(range(20, 25)))
 
+    def test_single_item_pages(self):
+        items = ["first", "second"]
+        start, end = page_bounds(2, 1)
+        self.assertEqual(items[start:end], ["second"])
+
     def test_invalid_page_is_refused(self):
         with self.assertRaises(ValueError):
             page_bounds(0, 10)

@@ -12,5 +12,5 @@ def page_bounds(page, per_page):
     if per_page < 1:
         raise ValueError("per_page must be 1 or greater")
     start = (page - 1) * per_page
-    end = page * per_page - 1
+    end = page * per_page
     return start, end
