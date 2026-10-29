@@ -31,6 +31,29 @@ class BackoffDelayTests(unittest.TestCase):
         for delay in backoff_delays(6, base=1.0, factor=2.0, cap=100.0, jitter=0.25):
             self.assertGreaterEqual(delay, 0.0)
 
+    def test_positive_jitter_is_clamped_after_scaling(self):
+        class MaximumJitter:
+            def uniform(self, lower, upper):
+                return upper
+
+        self.assertEqual(backoff_delays(1, base=8.0, cap=10.0, jitter=0.5,
+                                        rng=MaximumJitter()), [10.0])
+
+    def test_negative_jitter_scales_the_uncapped_delay(self):
+        class MinimumJitter:
+            def uniform(self, lower, upper):
+                return lower
+
+        self.assertEqual(backoff_delays(1, base=20.0, cap=10.0, jitter=0.5,
+                                        rng=MinimumJitter()), [10.0])
+
+    def test_zero_attempts_does_not_consume_randomness(self):
+        class UnexpectedDraw:
+            def uniform(self, lower, upper):
+                raise AssertionError("no retry should consume randomness")
+
+        self.assertEqual(backoff_delays(0, jitter=0.5, rng=UnexpectedDraw()), [])
+
     def test_negative_attempts_is_refused(self):
         with self.assertRaises(ValueError):
             backoff_delays(-1)
